@@ -4,7 +4,7 @@ FROM node:lts-alpine as build
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy the package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies
@@ -22,11 +22,11 @@ FROM nginx:stable-alpine
 # Copy the build output to the nginx html directory
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration (optional)
-# COPY nginx.conf /etc/nginx/nginx.conf
+# Custom Nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose port 80
-EXPOSE 80
+# Expose port 8080 for Nginx
+EXPOSE 8080
 
-# Start nginx
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
