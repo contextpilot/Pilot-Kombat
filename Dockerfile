@@ -16,17 +16,24 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Stage 2: Serve
-FROM nginx:stable-alpine
+# Stage 2: Serve with Vite Preview
+FROM node:lts-alpine
 
-# Copy the build output to the nginx html directory
-COPY --from=build /app/dist /usr/share/nginx/html
+# Set the working directory
+WORKDIR /app
 
-# Custom Nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+# Copy the build output and the package.json file
+COPY --from=build /app/dist /app/dist
+COPY --from=build /app/package*.json ./
 
-# Expose port 8080 for Nginx
+# Install only production dependencies
+RUN npm install --only=production
+
+# Expose port 8080
 EXPOSE 8080
 
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Set environment variable for Vite preview port
+ENV PORT 8080
+
+# Start the Vite preview server on port 8080
+CMD ["npm", "run", "preview", "--", "--port", "8080"]
