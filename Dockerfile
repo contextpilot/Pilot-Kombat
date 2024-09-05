@@ -33,7 +33,7 @@ RUN npm install --only=production
 EXPOSE 8080
 
 # Set environment variable for Vite preview port
-ENV PORT 8080
+ENV PORT=8080
 
 # Start the Vite preview server on port 8080
-CMD ["npm", "run", "preview", "--", "--port", "8080"]
+CMD ["npm", "run", "preview"]
