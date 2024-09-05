@@ -1,5 +1,5 @@
-# Stage 1: Build
-FROM node:lts-alpine as build
+# Use node:lts-alpine as the base image
+FROM node:lts-alpine
 
 # Set the working directory
 WORKDIR /app
@@ -15,19 +15,6 @@ COPY . .
 
 # Build the application
 RUN npm run build
-
-# Stage 2: Serve with Vite Preview
-FROM node:lts-alpine
-
-# Set the working directory
-WORKDIR /app
-
-# Copy the build output and the package.json file
-COPY --from=build /app/dist /app/dist
-COPY --from=build /app/package*.json ./
-
-# Install only production dependencies
-RUN npm install --only=production
 
 # Expose port 8080
 EXPOSE 8080
