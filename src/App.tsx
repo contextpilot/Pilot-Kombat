@@ -1,14 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Hamster from './icons/Hamster';
-import { binanceLogo, dailyCipher, dailyCombo, dailyReward, dollarCoin, hamsterCoin, mainCharacter } from './images';
+import {
+  binanceLogo,
+  dailyCipher,
+  dailyCombo,
+  dailyReward,
+  dollarCoin,
+  hamsterCoin,
+  mainCharacter
+} from './images';
 import Info from './icons/Info';
 import Settings from './icons/Settings';
 import Mine from './icons/Mine';
 import Friends from './icons/Friends';
 import Coins from './icons/Coins';
 
+import WebApp from '@twa-dev/sdk'
+
 const App: React.FC = () => {
+  // Integration of Telegram WebApp initialization
+  interface UserInfo {
+    first_name: string;
+    last_name: string;
+    username: string;
+    init: boolean;
+  }
+
+  const [userInfo, setUserInfo] = useState<UserInfo>({
+    first_name: '',
+    last_name: '',
+    username: '',
+    init: false,
+  });
+
+  useEffect(() => {
+    if (WebApp && !userInfo.init) {
+      const { first_name = '', last_name = '', username = '' } = WebApp.initDataUnsafe.user || {};
+      setUserInfo({ first_name, last_name, username, init: true });
+    }
+  }, [userInfo]);
+
   const levelNames = [
     "Bronze",    // From 0 to 4999 coins
     "Silver",    // From 5000 coins to 24,999 coins
@@ -139,7 +171,9 @@ const App: React.FC = () => {
               <Hamster size={24} className="text-[#d4d4d4]" />
             </div>
             <div>
-              <p className="text-sm">Nikandr (CEO)</p>
+              <p className="text-sm">
+                {userInfo.first_name} {userInfo.last_name} ({userInfo.username})
+              </p>
             </div>
           </div>
           <div className="flex items-center justify-between space-x-4 mt-1">
