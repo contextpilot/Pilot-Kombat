@@ -17,7 +17,7 @@ import Mine from './icons/Mine';
 import Friends from './icons/Friends';
 import Coins from './icons/Coins';
 
-import WebApp from '@twa-dev/sdk'
+import WebApp from '@twa-dev/sdk';
 
 const App: React.FC = () => {
   // Integration of Telegram WebApp initialization
@@ -39,10 +39,10 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (WebApp && !userInfo.init) {
-      const { first_name = '', last_name = '', username = '', id = '' } = WebApp.initDataUnsafe.user || {};
+      const { first_name = '', last_name = '', username = '', id = '0000' } = WebApp.initDataUnsafe.user || {};
       const telegram_id = id.toString(); // Convert the telegram_id to a string
       setUserInfo({ first_name, last_name, username, init: true, telegram_id });
-      console.log("userInfo", userInfo)
+      console.log("userInfo", userInfo);
 
       // Send verification request
       axios.get(`https://main-wjaxre4ena-uc.a.run.app/is_telegram_verified?telegram_id=${telegram_id}`)
@@ -293,8 +293,17 @@ const App: React.FC = () => {
       </div>
 
       {verificationWarning && (
-        <div className="fixed bottom-0 left-0 right-0 bg-red-600 text-white text-center p-2">
-          Warning: Please verify your Telegram ID with the provided code.
+        <div className="modal-overlay fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white text-black p-4 rounded-lg shadow-lg">
+            <h2 className="text-lg font-bold mb-2">Warning</h2>
+            <p>Please verify your Telegram ID with the provided code.</p>
+            <button
+              onClick={() => setVerificationWarning(false)}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded"
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
 
