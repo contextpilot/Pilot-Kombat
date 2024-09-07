@@ -26,6 +26,7 @@ const App: React.FC = () => {
     username: string;
     init: boolean;
     telegram_id?: string;
+    evm_address?: string; // Add EVM address to the userInfo
   }
 
   const [userInfo, setUserInfo] = useState<UserInfo>({
@@ -34,27 +35,26 @@ const App: React.FC = () => {
     username: '',
     init: false,
   });
-  
+
   const [verificationWarning, setVerificationWarning] = useState({
     show: false,
     message: '' // message property to handle different messages
   });
   const [telegramCode, setTelegramCode] = useState('');
   const [isVerified, setIsVerified] = useState(false);
-  const [evmAddress, setEvmAddress] = useState('');
 
   useEffect(() => {
     if (WebApp && !userInfo.init) {
       const { first_name = '', last_name = '', username = '', id = '0000' } = WebApp.initDataUnsafe.user || {};
       const telegram_id = id.toString();
-      setUserInfo({ first_name, last_name, username, init: true, telegram_id });
+      setUserInfo({ ...userInfo, first_name, last_name, username, init: true, telegram_id });
       console.log("userInfo", userInfo);
 
       axios.get(`https://main-wjaxre4ena-uc.a.run.app/is_telegram_verified?telegram_id=${telegram_id}`)
         .then(response => {
           if (response.data.telegram_id_verified) {
             setIsVerified(true);
-            setEvmAddress(response.data.evm_address);
+            setUserInfo({ ...userInfo, evm_address: response.data.evm_address }); // Update evm_address in userInfo
           } else {
             setVerificationWarning({ show: true, message: 'Please verify your Telegram ID with the provided code.' });
           }
@@ -75,7 +75,7 @@ const App: React.FC = () => {
       .then(response => {
         console.log('Verification successful:', response.data);
         setIsVerified(true);
-        setEvmAddress(response.data.evm_address);
+        setUserInfo({ ...userInfo, evm_address: response.data.evm_address }); // Update evm_address in userInfo
         setVerificationWarning({ show: true, message: 'Your Telegram ID has been successfully verified!' });
       })
       .catch(err => {
@@ -221,7 +221,7 @@ const App: React.FC = () => {
             </div>
             <div>
               <p className="text-sm">
-                {userInfo.first_name} {userInfo.last_name} ({isVerified ? evmAddress.slice(0, 6) : userInfo.username})
+                {userInfo.first_name} {userInfo.last_name} ({isVerified && userInfo.evm_address ? userInfo.evm_address.slice(0, 6) : userInfo.username})
               </p>
             </div>
           </div>
