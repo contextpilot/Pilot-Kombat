@@ -8,7 +8,6 @@ import {
   dailyReward,
   dollarCoin,
   hamsterCoin,
-  mainCharacter,
   mouse
 } from './images';
 import Info from './icons/Info';
