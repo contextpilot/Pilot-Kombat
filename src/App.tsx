@@ -36,6 +36,8 @@ const App: React.FC = () => {
     init: false,
   });
   const [verificationWarning, setVerificationWarning] = useState(false);
+  const [telegramCode, setTelegramCode] = useState('');
+  const [isVerified, setIsVerified] = useState(false); // New state to indicate if the user is verified
 
   useEffect(() => {
     if (WebApp && !userInfo.init) {
@@ -47,15 +49,35 @@ const App: React.FC = () => {
       // Send verification request
       axios.get(`https://main-wjaxre4ena-uc.a.run.app/is_telegram_verified?telegram_id=${telegram_id}`)
         .then(response => {
-          if (!response.data.telegram_id_verified) {
+          if (response.data.telegram_id_verified) {
+            setIsVerified(true);
+          } else {
             setVerificationWarning(true);
           }
         })
         .catch(err => {
           console.error('Verification check failed:', err);
+          setVerificationWarning(true);
         });
     }
   }, [userInfo]);
+
+  const handleVerificationSubmit = () => {
+    if (userInfo.telegram_id && telegramCode) {
+      axios.post('https://main-wjaxre4ena-uc.a.run.app/verify_telegram_account', {
+        telegram_id: userInfo.telegram_id,
+        telegram_code: telegramCode,
+      })
+      .then(response => {
+        console.log('Verification successful:', response.data);
+        setVerificationWarning(false);
+        setIsVerified(true); // Update isVerified to true after successful verification
+      })
+      .catch(err => {
+        console.error('Verification failed:', err);
+      });
+    }
+  };
 
   const levelNames = [
     "Bronze",    // From 0 to 4999 coins
@@ -126,6 +148,11 @@ const App: React.FC = () => {
   }, []);
 
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isVerified) {
+      setVerificationWarning(true);
+      return;
+    }
+
     const card = e.currentTarget;
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
@@ -297,6 +324,19 @@ const App: React.FC = () => {
           <div className="bg-white text-black p-4 rounded-lg shadow-lg">
             <h2 className="text-lg font-bold mb-2">Warning</h2>
             <p>Please verify your Telegram ID with the provided code.</p>
+            <input
+              type="text"
+              value={telegramCode}
+              onChange={(e) => setTelegramCode(e.target.value)}
+              placeholder="Enter Telegram code"
+              className="mt-2 p-2 border rounded w-full"
+            />
+            <button
+              onClick={handleVerificationSubmit}
+              className="mt-4 px-4 py-2 bg-green-600 text-white rounded"
+            >
+              Submit
+            </button>
             <button
               onClick={() => setVerificationWarning(false)}
               className="mt-4 px-4 py-2 bg-red-600 text-white rounded"
