@@ -20,7 +20,6 @@ import Coins from './icons/Coins';
 import WebApp from '@twa-dev/sdk';
 
 const App: React.FC = () => {
-  // Integration of Telegram WebApp initialization
   interface UserInfo {
     first_name: string;
     last_name: string;
@@ -37,7 +36,9 @@ const App: React.FC = () => {
   });
   const [verificationWarning, setVerificationWarning] = useState(false);
   const [telegramCode, setTelegramCode] = useState('');
-  const [isVerified, setIsVerified] = useState(false); // New state to indicate if the user is verified
+  const [isVerified, setIsVerified] = useState(false); 
+  const [evmAddress, setEvmAddress] = useState(''); // New state to store EVM address
+  const [verificationSuccess, setVerificationSuccess] = useState(false); // New state to handle success message
 
   useEffect(() => {
     if (WebApp && !userInfo.init) {
@@ -51,6 +52,7 @@ const App: React.FC = () => {
         .then(response => {
           if (response.data.telegram_id_verified) {
             setIsVerified(true);
+            setEvmAddress(response.data.evm_address); // Store the evm_address
           } else {
             setVerificationWarning(true);
           }
@@ -71,7 +73,9 @@ const App: React.FC = () => {
       .then(response => {
         console.log('Verification successful:', response.data);
         setVerificationWarning(false);
-        setIsVerified(true); // Update isVerified to true after successful verification
+        setIsVerified(true); 
+        setEvmAddress(response.data.evm_address); // Store the evm_address
+        setVerificationSuccess(true); // Display success message
       })
       .catch(err => {
         console.error('Verification failed:', err);
@@ -80,29 +84,29 @@ const App: React.FC = () => {
   };
 
   const levelNames = [
-    "Bronze",    // From 0 to 4999 coins
-    "Silver",    // From 5000 coins to 24,999 coins
-    "Gold",      // From 25,000 coins to 99,999 coins
-    "Platinum",  // From 100,000 coins to 999,999 coins
-    "Diamond",   // From 1,000,000 coins to 2,000,000 coins
-    "Epic",      // From 2,000,000 coins to 10,000,000 coins
-    "Legendary", // From 10,000,000 coins to 50,000,000 coins
-    "Master",    // From 50,000,000 coins to 100,000,000 coins
-    "GrandMaster", // From 100,000,000 coins to 1,000,000,000 coins
-    "Lord"       // From 1,000,000,000 coins to ∞
+    "Bronze", 
+    "Silver", 
+    "Gold", 
+    "Platinum", 
+    "Diamond", 
+    "Epic", 
+    "Legendary", 
+    "Master", 
+    "GrandMaster", 
+    "Lord" 
   ];
 
   const levelMinPoints = [
-    0,        // Bronze
-    5000,     // Silver
-    25000,    // Gold
-    100000,   // Platinum
-    1000000,  // Diamond
-    2000000,  // Epic
-    10000000, // Legendary
-    50000000, // Master
-    100000000,// GrandMaster
-    1000000000// Lord
+    0, 
+    5000, 
+    25000, 
+    100000, 
+    1000000, 
+    2000000, 
+    10000000, 
+    50000000, 
+    100000000, 
+    1000000000 
   ];
 
   const [levelIndex, setLevelIndex] = useState(6);
@@ -142,7 +146,7 @@ const App: React.FC = () => {
     };
 
     updateCountdowns();
-    const interval = setInterval(updateCountdowns, 60000); // Update every minute
+    const interval = setInterval(updateCountdowns, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -214,9 +218,8 @@ const App: React.FC = () => {
               <Hamster size={24} className="text-[#d4d4d4]" />
             </div>
             <div>
-              {/* Display the user's first name, last name and username */}
               <p className="text-sm">
-                {userInfo.first_name} {userInfo.last_name} ({userInfo.username})
+                {userInfo.first_name} {userInfo.last_name} ({isVerified ? evmAddress.slice(0, 6) : userInfo.username})
               </p>
             </div>
           </div>
@@ -340,6 +343,22 @@ const App: React.FC = () => {
             <button
               onClick={() => setVerificationWarning(false)}
               className="mt-4 px-4 py-2 bg-red-600 text-white rounded"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Display verification success message */}
+      {verificationSuccess && (
+        <div className="modal-overlay fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white text-black p-4 rounded-lg shadow-lg">
+            <h2 className="text-lg font-bold mb-2">Success</h2>
+            <p>Your Telegram ID has been successfully verified!</p>
+            <button
+              onClick={() => setVerificationSuccess(false)}
+              className="mt-4 px-4 py-2 bg-green-600 text-white rounded"
             >
               Close
             </button>
