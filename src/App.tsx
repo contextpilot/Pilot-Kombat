@@ -34,32 +34,34 @@ const App: React.FC = () => {
     username: '',
     init: false,
   });
-  const [verificationWarning, setVerificationWarning] = useState(false);
+  
+  const [verificationWarning, setVerificationWarning] = useState({
+    show: false,
+    message: '' // message property to handle different messages
+  });
   const [telegramCode, setTelegramCode] = useState('');
-  const [isVerified, setIsVerified] = useState(false); 
-  const [evmAddress, setEvmAddress] = useState(''); // New state to store EVM address
-  const [verificationSuccess, setVerificationSuccess] = useState(false); // New state to handle success message
+  const [isVerified, setIsVerified] = useState(false);
+  const [evmAddress, setEvmAddress] = useState('');
 
   useEffect(() => {
     if (WebApp && !userInfo.init) {
       const { first_name = '', last_name = '', username = '', id = '0000' } = WebApp.initDataUnsafe.user || {};
-      const telegram_id = id.toString(); // Convert the telegram_id to a string
+      const telegram_id = id.toString();
       setUserInfo({ first_name, last_name, username, init: true, telegram_id });
       console.log("userInfo", userInfo);
 
-      // Send verification request
       axios.get(`https://main-wjaxre4ena-uc.a.run.app/is_telegram_verified?telegram_id=${telegram_id}`)
         .then(response => {
           if (response.data.telegram_id_verified) {
             setIsVerified(true);
-            setEvmAddress(response.data.evm_address); // Store the evm_address
+            setEvmAddress(response.data.evm_address);
           } else {
-            setVerificationWarning(true);
+            setVerificationWarning({ show: true, message: 'Please verify your Telegram ID with the provided code.' });
           }
         })
         .catch(err => {
           console.error('Verification check failed:', err);
-          setVerificationWarning(true);
+          setVerificationWarning({ show: true, message: 'Verification check failed. Please try again.' });
         });
     }
   }, [userInfo]);
@@ -72,13 +74,14 @@ const App: React.FC = () => {
       })
       .then(response => {
         console.log('Verification successful:', response.data);
-        setVerificationWarning(false);
-        setIsVerified(true); 
-        setEvmAddress(response.data.evm_address); // Store the evm_address
-        setVerificationSuccess(true); // Display success message
+        setIsVerified(true);
+        setEvmAddress(response.data.evm_address);
+        setVerificationWarning({ show: false, message: '' });
+        setVerificationWarning({ show: true, message: 'Your Telegram ID has been successfully verified!' });
       })
       .catch(err => {
         console.error('Verification failed:', err);
+        setVerificationWarning({ show: true, message: 'Verification failed. Please try again.' });
       });
     }
   };
@@ -153,7 +156,7 @@ const App: React.FC = () => {
 
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isVerified) {
-      setVerificationWarning(true);
+      setVerificationWarning({ show: true, message: 'Please verify your Telegram ID with the provided code.' });
       return;
     }
 
@@ -298,7 +301,6 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom fixed div */}
       <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-[calc(100%-2rem)] max-w-xl bg-[#272a2f] flex justify-around items-center z-50 rounded-3xl text-xs">
         <div className="text-center text-[#85827d] w-1/5 bg-[#1c1f24] m-1 p-2 rounded-2xl">
           <img src={binanceLogo} alt="Exchange" className="w-8 h-8 mx-auto" />
@@ -322,43 +324,31 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {verificationWarning && (
+      {verificationWarning.show && (
         <div className="modal-overlay fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white text-black p-4 rounded-lg shadow-lg">
-            <h2 className="text-lg font-bold mb-2">Warning</h2>
-            <p>Please verify your Telegram ID with the provided code.</p>
-            <input
-              type="text"
-              value={telegramCode}
-              onChange={(e) => setTelegramCode(e.target.value)}
-              placeholder="Enter Telegram code"
-              className="mt-2 p-2 border rounded w-full"
-            />
+            <h2 className="text-lg font-bold mb-2">{verificationWarning.message.includes('verified') ? 'Success' : 'Warning'}</h2>
+            <p>{verificationWarning.message}</p>
+            {!isVerified && (
+              <>
+                <input
+                  type="text"
+                  value={telegramCode}
+                  onChange={(e) => setTelegramCode(e.target.value)}
+                  placeholder="Enter Telegram code"
+                  className="mt-2 p-2 border rounded w-full"
+                />
+                <button
+                  onClick={handleVerificationSubmit}
+                  className="mt-4 px-4 py-2 bg-green-600 text-white rounded"
+                >
+                  Submit
+                </button>
+              </>
+            )}
             <button
-              onClick={handleVerificationSubmit}
-              className="mt-4 px-4 py-2 bg-green-600 text-white rounded"
-            >
-              Submit
-            </button>
-            <button
-              onClick={() => setVerificationWarning(false)}
+              onClick={() => setVerificationWarning({ show: false, message: '' })}
               className="mt-4 px-4 py-2 bg-red-600 text-white rounded"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Display verification success message */}
-      {verificationSuccess && (
-        <div className="modal-overlay fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white text-black p-4 rounded-lg shadow-lg">
-            <h2 className="text-lg font-bold mb-2">Success</h2>
-            <p>Your Telegram ID has been successfully verified!</p>
-            <button
-              onClick={() => setVerificationSuccess(false)}
-              className="mt-4 px-4 py-2 bg-green-600 text-white rounded"
             >
               Close
             </button>
