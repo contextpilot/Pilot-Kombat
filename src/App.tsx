@@ -26,7 +26,7 @@ const App: React.FC = () => {
     username: string;
     init: boolean;
     telegram_id?: string;
-    evm_address?: string; // Add EVM address to the userInfo
+    evm_address?: string; 
   }
 
   const [userInfo, setUserInfo] = useState<UserInfo>({
@@ -38,8 +38,9 @@ const App: React.FC = () => {
 
   const [verificationWarning, setVerificationWarning] = useState({
     show: false,
-    message: '' // message property to handle different messages
+    message: ''
   });
+
   const [telegramCode, setTelegramCode] = useState('');
   const [isVerified, setIsVerified] = useState(false);
 
@@ -47,14 +48,13 @@ const App: React.FC = () => {
     if (WebApp && !userInfo.init) {
       const { first_name = '', last_name = '', username = '', id = '0000' } = WebApp.initDataUnsafe.user || {};
       const telegram_id = id.toString();
-      setUserInfo({ ...userInfo, first_name, last_name, username, init: true, telegram_id });
-      console.log("userInfo", userInfo);
+      setUserInfo(prev => ({ ...prev, first_name, last_name, username, init: true, telegram_id }));
 
       axios.get(`https://main-wjaxre4ena-uc.a.run.app/is_telegram_verified?telegram_id=${telegram_id}`)
         .then(response => {
           if (response.data.telegram_id_verified) {
             setIsVerified(true);
-            setUserInfo({ ...userInfo, evm_address: response.data.evm_address }); // Update evm_address in userInfo
+            setUserInfo(prev => ({ ...prev, evm_address: response.data.evm_address }));
           } else {
             setVerificationWarning({ show: true, message: 'Please verify your Telegram ID with the provided code.' });
           }
@@ -64,7 +64,7 @@ const App: React.FC = () => {
           setVerificationWarning({ show: true, message: 'Verification check failed. Please try again.' });
         });
     }
-  }, [userInfo]);
+  }, [userInfo.init]);
 
   const handleVerificationSubmit = () => {
     if (userInfo.telegram_id && telegramCode) {
@@ -73,9 +73,8 @@ const App: React.FC = () => {
         telegram_code: telegramCode,
       })
       .then(response => {
-        console.log('Verification successful:', response.data);
         setIsVerified(true);
-        setUserInfo({ ...userInfo, evm_address: response.data.evm_address }); // Update evm_address in userInfo
+        setUserInfo(prev => ({ ...prev, evm_address: response.data.evm_address }));
         setVerificationWarning({ show: true, message: 'Your Telegram ID has been successfully verified!' });
       })
       .catch(err => {
@@ -221,7 +220,7 @@ const App: React.FC = () => {
             </div>
             <div>
               <p className="text-sm">
-                {userInfo.first_name} {userInfo.last_name} ({isVerified && userInfo.evm_address ? userInfo.evm_address.slice(0, 6) : userInfo.username})
+                {userInfo.first_name} {userInfo.last_name} {isVerified ? `(${userInfo.evm_address?.slice(0, 6)})` : `(${userInfo.username})`}
               </p>
             </div>
           </div>
