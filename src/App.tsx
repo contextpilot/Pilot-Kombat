@@ -9,7 +9,8 @@ import Dashboard from './components/Dashboard';
 import FooterNavigation from './components/FooterNavigation';
 import VerificationModal from './components/VerificationModal';
 import FloatingPoints from './components/FloatingPoints';
-import ProfitInfo from './components/ProfitInfo'
+import ProfitInfo from './components/ProfitInfo';
+import { fetchGameData, fetchUserData } from './services/apiService';
 
 const App: React.FC = () => {
   interface UserInfo {
@@ -36,6 +37,18 @@ const App: React.FC = () => {
   const [telegramCode, setTelegramCode] = useState('');
   const [isVerified, setIsVerified] = useState(false);
 
+  const [levelNames, setLevelNames] = useState<string[]>([]);
+  const [levelMinPoints, setLevelMinPoints] = useState<number[]>([]);
+  const [levelIndex, setLevelIndex] = useState(0);
+  const [points, setPoints] = useState(0);
+  const [clicks, setClicks] = useState<{ id: number, x: number, y: number }[]>([]);
+  const [pointsToAdd, setPointsToAdd] = useState(0);
+  const [profitPerHour, setProfitPerHour] = useState(0);
+
+  const [dailyRewardTimeLeft, setDailyRewardTimeLeft] = useState("");
+  const [dailyCipherTimeLeft, setDailyCipherTimeLeft] = useState("");
+  const [dailyComboTimeLeft, setDailyComboTimeLeft] = useState("");
+
   useEffect(() => {
     if (WebApp && !userInfo.init) {
       const { first_name = '', last_name = '', username = '', id = '0000' } = WebApp.initDataUnsafe.user || {};
@@ -58,6 +71,34 @@ const App: React.FC = () => {
     }
   }, [userInfo.init]);
 
+  useEffect(() => {
+    const initializeGameData = async () => {
+      try {
+        const gameDataResponse = await fetchGameData();
+        const userDataResponse = await fetchUserData(userInfo.telegram_id || "");
+
+        // assuming the data structure returned from the server
+        if (gameDataResponse) {
+          setLevelNames(gameDataResponse.levelNames);
+          setLevelMinPoints(gameDataResponse.levelMinPoints);
+          setPointsToAdd(gameDataResponse.pointsToAdd);
+        }
+
+        if (userDataResponse) {
+          setPoints(userDataResponse.points);
+          setProfitPerHour(userDataResponse.profitPerHour);
+          setLevelIndex(userDataResponse.levelIndex);
+        }
+      } catch (error) {
+        console.error('Error initializing game data:', error);
+      }
+    };
+
+    if (userInfo.telegram_id) {
+      initializeGameData();
+    }
+  }, [userInfo.telegram_id]);
+
   const handleVerificationSubmit = () => {
     if (userInfo.telegram_id && telegramCode) {
       axios.post('https://main-wjaxre4ena-uc.a.run.app/verify_telegram_account', {
@@ -75,42 +116,6 @@ const App: React.FC = () => {
       });
     }
   };
-
-  const levelNames = [
-    "Bronze", 
-    "Silver", 
-    "Gold", 
-    "Platinum", 
-    "Diamond", 
-    "Epic", 
-    "Legendary", 
-    "Master", 
-    "GrandMaster", 
-    "Lord" 
-  ];
-
-  const levelMinPoints = [
-    0, 
-    5000, 
-    25000, 
-    100000, 
-    1000000, 
-    2000000, 
-    10000000, 
-    50000000, 
-    100000000, 
-    1000000000 
-  ];
-
-  const [levelIndex, setLevelIndex] = useState(6);
-  const [points, setPoints] = useState(22749365);
-  const [clicks, setClicks] = useState<{ id: number, x: number, y: number }[]>([]);
-  const pointsToAdd = 11;
-  const profitPerHour = 126420;
-
-  const [dailyRewardTimeLeft, setDailyRewardTimeLeft] = useState("");
-  const [dailyCipherTimeLeft, setDailyCipherTimeLeft] = useState("");
-  const [dailyComboTimeLeft, setDailyComboTimeLeft] = useState("");
 
   const calculateTimeLeft = (targetHour: number) => {
     const now = new Date();
