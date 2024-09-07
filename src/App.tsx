@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './App.css';
 import Hamster from './icons/Hamster';
 import {
@@ -25,6 +26,7 @@ const App: React.FC = () => {
     last_name: string;
     username: string;
     init: boolean;
+    telegram_id?: string;
   }
 
   const [userInfo, setUserInfo] = useState<UserInfo>({
@@ -33,11 +35,25 @@ const App: React.FC = () => {
     username: '',
     init: false,
   });
+  const [verificationWarning, setVerificationWarning] = useState(false);
 
   useEffect(() => {
     if (WebApp && !userInfo.init) {
-      const { first_name = '', last_name = '', username = '' } = WebApp.initDataUnsafe.user || {};
-      setUserInfo({ first_name, last_name, username, init: true });
+      const { first_name = '', last_name = '', username = '', id = '' } = WebApp.initDataUnsafe.user || {};
+      const telegram_id = id.toString(); // Convert the telegram_id to a string
+      setUserInfo({ first_name, last_name, username, init: true, telegram_id });
+      console.log("userInfo", userInfo)
+
+      // Send verification request
+      axios.get(`https://main-wjaxre4ena-uc.a.run.app/is_telegram_verified?telegram_id=${telegram_id}`)
+        .then(response => {
+          if (!response.data.telegram_id_verified) {
+            setVerificationWarning(true);
+          }
+        })
+        .catch(err => {
+          console.error('Verification check failed:', err);
+        });
     }
   }, [userInfo]);
 
@@ -171,6 +187,7 @@ const App: React.FC = () => {
               <Hamster size={24} className="text-[#d4d4d4]" />
             </div>
             <div>
+              {/* Display the user's first name, last name and username */}
               <p className="text-sm">
                 {userInfo.first_name} {userInfo.last_name} ({userInfo.username})
               </p>
@@ -274,6 +291,12 @@ const App: React.FC = () => {
           <p className="mt-1">Airdrop</p>
         </div>
       </div>
+
+      {verificationWarning && (
+        <div className="fixed bottom-0 left-0 right-0 bg-red-600 text-white text-center p-2">
+          Warning: Please verify your Telegram ID with the provided code.
+        </div>
+      )}
 
       {clicks.map((click) => (
         <div
