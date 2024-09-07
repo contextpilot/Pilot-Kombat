@@ -8,7 +8,8 @@ import {
   dailyReward,
   dollarCoin,
   hamsterCoin,
-  mainCharacter
+  mainCharacter,
+  mouse
 } from './images';
 import Info from './icons/Info';
 import Settings from './icons/Settings';
@@ -243,7 +244,7 @@ const App: React.FC = () => {
                 onClick={handleCardClick}
               >
                 <div className="w-full h-full rounded-full circle-inner">
-                  <img src={mainCharacter} alt="Main Character" className="w-full h-full" />
+                  <img src={mouse} alt="Main Character" className="w-full h-full" />
                 </div>
               </div>
             </div>
