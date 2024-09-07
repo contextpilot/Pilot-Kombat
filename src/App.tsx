@@ -76,7 +76,6 @@ const App: React.FC = () => {
         console.log('Verification successful:', response.data);
         setIsVerified(true);
         setEvmAddress(response.data.evm_address);
-        setVerificationWarning({ show: false, message: '' });
         setVerificationWarning({ show: true, message: 'Your Telegram ID has been successfully verified!' });
       })
       .catch(err => {
