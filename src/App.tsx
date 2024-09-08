@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './App.css';
 import WebApp from '@twa-dev/sdk';
-import _ from 'lodash'; // Import lodash
+import _ from 'lodash';
 
 import UserProfile from './components/UserProfile';
 import LevelProgress from './components/LevelProgress';
@@ -209,6 +209,20 @@ const App: React.FC = () => {
       debouncedCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
     }
   }, [points, userInfo.telegram_id, userInfo.evm_address, debouncedCheckIn]);
+
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      if (userInfo.telegram_id && userInfo.evm_address) {
+        await userCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [userInfo.telegram_id, userInfo.evm_address, points]);
 
   return (
     <div className="bg-black flex justify-center">
