@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-export const fetchGameData = async () => {
+export const fetchGameData = async (telegram_id: string) => {
   try {
-    const response = await axios.get('https://main-wjaxre4ena-uc.a.run.app/api/game-data');
+    const response = await axios.get(`https://main-wjaxre4ena-uc.a.run.app/api/game-data?telegram_id=${telegram_id}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching game data:', error);

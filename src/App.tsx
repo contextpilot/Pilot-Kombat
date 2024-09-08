@@ -74,7 +74,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const initializeGameData = async () => {
       try {
-        const gameDataResponse = await fetchGameData();
+        const gameDataResponse = await fetchGameData(userInfo.telegram_id || "");
         const userDataResponse = await fetchUserData(userInfo.telegram_id || "");
 
         // assuming the data structure returned from the server
