@@ -19,3 +19,15 @@ export const fetchUserData = async (telegram_id: string) => {
     return null;
   }
 };
+
+export const userCheckIn = async (telegram_id: string, evm_address: string, total_checkin_points: number) => {
+  try {
+    await axios.post('https://main-wjaxre4ena-uc.a.run.app/api/user-checkin', {
+      telegram_id,
+      evm_address,
+      total_checkin_points,
+    });
+  } catch (error) {
+    console.error('Error during check-in:', error);
+  }
+};

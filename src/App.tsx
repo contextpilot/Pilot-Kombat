@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './App.css';
 import WebApp from '@twa-dev/sdk';
+import _ from 'lodash'; // Import lodash
 
 import UserProfile from './components/UserProfile';
 import LevelProgress from './components/LevelProgress';
@@ -10,7 +11,7 @@ import FooterNavigation from './components/FooterNavigation';
 import VerificationModal from './components/VerificationModal';
 import FloatingPoints from './components/FloatingPoints';
 import ProfitInfo from './components/ProfitInfo';
-import { fetchGameData, fetchUserData } from './services/apiService';
+import { fetchGameData, fetchUserData, userCheckIn } from './services/apiService';
 
 const App: React.FC = () => {
   interface UserInfo {
@@ -19,7 +20,7 @@ const App: React.FC = () => {
     username: string;
     init: boolean;
     telegram_id?: string;
-    evm_address?: string; 
+    evm_address?: string;
   }
 
   const [userInfo, setUserInfo] = useState<UserInfo>({
@@ -77,7 +78,6 @@ const App: React.FC = () => {
         const gameDataResponse = await fetchGameData(userInfo.telegram_id || "");
         const userDataResponse = await fetchUserData(userInfo.telegram_id || "");
 
-        // assuming the data structure returned from the server
         if (gameDataResponse) {
           setLevelNames(gameDataResponse.levelNames);
           setLevelMinPoints(gameDataResponse.levelMinPoints);
@@ -196,6 +196,19 @@ const App: React.FC = () => {
     }, 1000);
     return () => clearInterval(interval);
   }, [profitPerHour]);
+
+  const debouncedCheckIn = useCallback(
+    _.debounce(async (telegram_id: string, evm_address: string, total_checkin_points: number) => {
+      await userCheckIn(telegram_id, evm_address, total_checkin_points);
+    }, 5000), // debounce delay of 5 seconds
+    []
+  );
+
+  useEffect(() => {
+    if (userInfo.telegram_id && userInfo.evm_address) {
+      debouncedCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
+    }
+  }, [points, userInfo.telegram_id, userInfo.evm_address, debouncedCheckIn]);
 
   return (
     <div className="bg-black flex justify-center">
