@@ -211,14 +211,22 @@ const App: React.FC = () => {
   }, [points, userInfo.telegram_id, userInfo.evm_address, debouncedCheckIn]);
 
   useEffect(() => {
-    const handleBeforeUnload = async () => {
+    const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
       if (userInfo.telegram_id && userInfo.evm_address) {
-        await userCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
+        event.preventDefault();
+        event.returnValue = ''; // Some browsers require this for custom message
+        
+        try {
+          await userCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
+        } catch (error) {
+          console.error('Error during user check-in before unload:', error);
+        }
       }
     };
-
+  
+    // Ensure the event handler is called when the user attempts to close the page
     window.addEventListener('beforeunload', handleBeforeUnload);
-
+  
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
