@@ -13,6 +13,21 @@ import FloatingPoints from './components/FloatingPoints';
 import ProfitInfo from './components/ProfitInfo';
 import { fetchGameData, fetchUserData, userCheckIn } from './services/apiService';
 
+// Extend the Telegram WebApp type definitions to include custom events
+interface TelegramWebApp {
+  onEvent(eventType: 'web_app_close', callback: () => void): void;
+  offEvent(eventType: 'web_app_close', callback: () => void): void;
+}
+
+// Extend the global interface to recognize the custom Telegram WebApp
+declare global {
+  interface Window {
+    Telegram: {
+      WebApp: TelegramWebApp;
+    };
+  }
+}
+
 const App: React.FC = () => {
   interface UserInfo {
     first_name: string;
@@ -211,6 +226,24 @@ const App: React.FC = () => {
   }, [points, userInfo.telegram_id, userInfo.evm_address, debouncedCheckIn]);
 
   useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'hidden' && userInfo.telegram_id && userInfo.evm_address) {
+        try {
+          await userCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
+        } catch (error) {
+          console.error('Error during user check-in on visibility change:', error);
+        }
+      }
+    };
+  
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+  
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [userInfo.telegram_id, userInfo.evm_address, points]);
+  
+  useEffect(() => {
     const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
       if (userInfo.telegram_id && userInfo.evm_address) {
         event.preventDefault();
@@ -224,11 +257,29 @@ const App: React.FC = () => {
       }
     };
   
-    // Ensure the event handler is called when the user attempts to close the page
     window.addEventListener('beforeunload', handleBeforeUnload);
   
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [userInfo.telegram_id, userInfo.evm_address, points]);
+  
+  useEffect(() => {
+    const handleTelegramClose = async () => {
+      if (userInfo.telegram_id && userInfo.evm_address) {
+        try {
+          await userCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
+        } catch (error) {
+          console.error('Error during user check-in on Telegram close:', error);
+        }
+      }
+    };
+  
+    const telegramWebApp = window.Telegram.WebApp as unknown as TelegramWebApp;
+    telegramWebApp.onEvent('web_app_close', handleTelegramClose);
+  
+    return () => {
+      telegramWebApp.offEvent('web_app_close', handleTelegramClose);
     };
   }, [userInfo.telegram_id, userInfo.evm_address, points]);
 
