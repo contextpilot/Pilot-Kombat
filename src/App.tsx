@@ -250,6 +250,7 @@ const App: React.FC = () => {
         event.returnValue = ''; // Some browsers require this for custom message
         
         try {
+          console.log("come here")
           await userCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
         } catch (error) {
           console.error('Error during user check-in before unload:', error);
@@ -268,6 +269,7 @@ const App: React.FC = () => {
     const handleTelegramClose = async () => {
       if (userInfo.telegram_id && userInfo.evm_address) {
         try {
+          console.log("come here1")
           await userCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
         } catch (error) {
           console.error('Error during user check-in on Telegram close:', error);
