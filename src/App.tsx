@@ -215,7 +215,7 @@ const App: React.FC = () => {
   const debouncedCheckIn = useCallback(
     _.debounce(async (telegram_id: string, evm_address: string, total_checkin_points: number) => {
       await userCheckIn(telegram_id, evm_address, total_checkin_points);
-    }, 5000), // debounce delay of 5 seconds
+    }, 500), // debounce delay of 5 seconds
     []
   );
 
