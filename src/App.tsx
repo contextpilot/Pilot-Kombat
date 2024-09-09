@@ -205,9 +205,14 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    const pointsPerSecond = Math.floor(profitPerHour / 3600);
+    let accumulatedPoints = 0;
+    const pointsPerSecond = profitPerHour / 3600.0; // Use floating-point division for more accurate points calculation
     const interval = setInterval(() => {
-      setPoints(prevPoints => prevPoints + pointsPerSecond);
+      accumulatedPoints += pointsPerSecond;
+      if (accumulatedPoints >= 1) {
+        setPoints(prevPoints => prevPoints + Math.floor(accumulatedPoints));
+        accumulatedPoints -= Math.floor(accumulatedPoints); // Retain the fractional part
+      }
     }, 1000);
     return () => clearInterval(interval);
   }, [profitPerHour]);
