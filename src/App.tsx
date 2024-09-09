@@ -225,66 +225,6 @@ const App: React.FC = () => {
     }
   }, [points, userInfo.telegram_id, userInfo.evm_address, debouncedCheckIn]);
 
-  useEffect(() => {
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'hidden' && userInfo.telegram_id && userInfo.evm_address) {
-        try {
-          await userCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
-        } catch (error) {
-          console.error('Error during user check-in on visibility change:', error);
-        }
-      }
-    };
-  
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-  
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [userInfo.telegram_id, userInfo.evm_address, points]);
-  
-  useEffect(() => {
-    const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
-      if (userInfo.telegram_id && userInfo.evm_address) {
-        event.preventDefault();
-        event.returnValue = ''; // Some browsers require this for custom message
-        
-        try {
-          console.log("come here")
-          await userCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
-        } catch (error) {
-          console.error('Error during user check-in before unload:', error);
-        }
-      }
-    };
-  
-    window.addEventListener('beforeunload', handleBeforeUnload);
-  
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [userInfo.telegram_id, userInfo.evm_address, points]);
-  
-  useEffect(() => {
-    const handleTelegramClose = async () => {
-      if (userInfo.telegram_id && userInfo.evm_address) {
-        try {
-          console.log("come here1")
-          await userCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
-        } catch (error) {
-          console.error('Error during user check-in on Telegram close:', error);
-        }
-      }
-    };
-  
-    const telegramWebApp = window.Telegram.WebApp as unknown as TelegramWebApp;
-    telegramWebApp.onEvent('web_app_close', handleTelegramClose);
-  
-    return () => {
-      telegramWebApp.offEvent('web_app_close', handleTelegramClose);
-    };
-  }, [userInfo.telegram_id, userInfo.evm_address, points]);
-
   return (
     <div className="bg-black flex justify-center">
       <div className="w-full bg-black text-white h-screen font-bold flex flex-col max-w-xl">
