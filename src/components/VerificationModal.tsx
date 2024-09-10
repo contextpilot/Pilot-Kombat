@@ -24,10 +24,15 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
   return (
     <div className="modal-overlay fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white text-black p-4 rounded-lg shadow-lg">
-        <h2 className="text-lg font-bold mb-2">{message.includes('verified') ? 'Success' : 'Warning'}</h2>
+        <h2 className="text-lg font-bold mb-2">
+          {message.includes('verified') ? 'Success' : 'Warning'}
+        </h2>
         <p>{message}</p>
         {!isVerified && (
           <>
+            <p className="mt-2">
+              For more details, visit this documentation <a href="https://doc.context-pilot.xyz/getting-started/use-pilot-kombat" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">link</a>.
+            </p>
             <input
               type="text"
               value={telegramCode}
