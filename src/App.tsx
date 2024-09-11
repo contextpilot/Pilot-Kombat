@@ -232,7 +232,7 @@ const App: React.FC = () => {
 
   // New function to handle closing the verification modal
   const handleVerificationModalClose = () => {
-    if (userInfo.telegram_id) {
+    if (userInfo.evm_address) {
       setIsVerified(true);
     }
     setVerificationWarning({ show: false, message: '' });
