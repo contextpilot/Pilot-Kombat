@@ -230,8 +230,16 @@ const App: React.FC = () => {
     }
   }, [points, userInfo.telegram_id, userInfo.evm_address, debouncedCheckIn]);
 
+  // New function to handle closing the verification modal
+  const handleVerificationModalClose = () => {
+    if (userInfo.telegram_id) {
+      setIsVerified(true);
+    }
+    setVerificationWarning({ show: false, message: '' });
+  };
+
   const handleUserProfileClick = () => {
-    setIsVerified(false);
+    setIsVerified(false); // Reset isVerified to false when clicking on user profile
     setVerificationWarning({ show: true, message: 'You can update your Telegram ID with the provided code.' });
   };
 
@@ -275,7 +283,7 @@ const App: React.FC = () => {
       <VerificationModal 
         isOpen={verificationWarning.show}
         message={verificationWarning.message}
-        onClose={() => setVerificationWarning({ show: false, message: '' })}
+        onClose={handleVerificationModalClose} // Updated onClose handler
         isVerified={isVerified}
         telegramCode={telegramCode}
         onTelegramCodeChange={(e) => setTelegramCode(e.target.value)}
