@@ -230,6 +230,10 @@ const App: React.FC = () => {
     }
   }, [points, userInfo.telegram_id, userInfo.evm_address, debouncedCheckIn]);
 
+  const handleUserProfileClick = () => {
+    setVerificationWarning({ show: true, message: 'You can update your Telegram ID with the provided code.' });
+  };
+
   return (
     <div className="bg-black flex justify-center">
       <div className="w-full bg-black text-white h-screen font-bold flex flex-col max-w-xl">
@@ -240,6 +244,7 @@ const App: React.FC = () => {
             username={userInfo.username}
             isVerified={isVerified}
             evmAddress={userInfo.evm_address}
+            onClick={handleUserProfileClick} // Pass the onClick handler
           />
           <div className="flex items-center justify-between space-x-4 mt-1">
             <LevelProgress 

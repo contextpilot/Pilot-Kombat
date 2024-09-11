@@ -7,10 +7,11 @@ interface UserProfileProps {
   username: string;
   isVerified: boolean;
   evmAddress?: string;
+  onClick: () => void; // Add this line
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ firstName, lastName, username, isVerified, evmAddress }) => (
-  <div className="flex items-center space-x-2 pt-4">
+const UserProfile: React.FC<UserProfileProps> = ({ firstName, lastName, username, isVerified, evmAddress, onClick }) => (
+  <div className="flex items-center space-x-2 pt-4" onClick={onClick}> {/* Add onClick here */}
     <div className="p-1 rounded-lg bg-[#1d2025]">
       <Hamster size={24} className="text-[#d4d4d4]" />
     </div>
