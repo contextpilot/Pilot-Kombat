@@ -231,6 +231,7 @@ const App: React.FC = () => {
   }, [points, userInfo.telegram_id, userInfo.evm_address, debouncedCheckIn]);
 
   const handleUserProfileClick = () => {
+    setIsVerified(false);
     setVerificationWarning({ show: true, message: 'You can update your Telegram ID with the provided code.' });
   };
 
