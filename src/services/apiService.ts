@@ -45,8 +45,12 @@ export const userCheckIn = async (telegram_id: string, evm_address: string, tota
       params.telegram_id = telegram_id;
     }
 
-    await axios.get(`${API_BASE_URL}/user-checkin`, { params });
+    const response = await axios.get(`${API_BASE_URL}/user-checkin`, { params });
+    
+    // Return the new_stored_points from the server response
+    return response.data;
   } catch (error) {
     console.error('Error during check-in:', error);
+    return null;
   }
 };

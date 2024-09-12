@@ -1,4 +1,4 @@
-// src/App.tsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -224,9 +224,16 @@ const App: React.FC = () => {
 
   const debouncedCheckIn = useCallback(
     _.debounce(async (telegram_id: string, evm_address: string, total_checkin_points: number) => {
-      await userCheckIn(telegram_id, evm_address, total_checkin_points);
+      try {
+        const response = await userCheckIn(telegram_id, evm_address, total_checkin_points);
+        if(response && response.new_stored_points > points) {
+          setPoints(response.new_stored_points);
+        }
+      } catch (error) {
+        console.error('Error during user check-in:', error);
+      }
     }, 500), // debounce delay of 5 seconds
-    []
+    [points] // added points as dependency
   );
 
   useEffect(() => {
