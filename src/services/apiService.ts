@@ -34,10 +34,17 @@ export const fetchUserData = async (telegram_id: string, evm_address: string) =>
 
 export const userCheckIn = async (telegram_id: string, evm_address: string, total_checkin_points: number) => {
   try {
-    const params = {
-        ...getFetchParams(telegram_id, evm_address),
-        total_checkin_points
-    };
+    // Validation check for required fields
+    if (telegram_id !== '0000' && !evm_address) {
+      throw new Error('EVM address is required when telegram_id is provided.');
+    }
+
+    // Construct the params object conditionally
+    const params: Record<string, any> = { total_checkin_points, evm_address };
+    if (telegram_id !== '0000') {
+      params.telegram_id = telegram_id;
+    }
+
     await axios.get(`${API_BASE_URL}/user-checkin`, { params });
   } catch (error) {
     console.error('Error during check-in:', error);
