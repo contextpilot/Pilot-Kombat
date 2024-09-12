@@ -1,4 +1,6 @@
+// src/App.tsx
 import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import './App.css';
 import WebApp from '@twa-dev/sdk';
@@ -13,13 +15,11 @@ import FloatingPoints from './components/FloatingPoints';
 import ProfitInfo from './components/ProfitInfo';
 import { fetchGameData, fetchUserData, userCheckIn } from './services/apiService';
 
-// Extend the Telegram WebApp type definitions to include custom events
 interface TelegramWebApp {
   onEvent(eventType: 'web_app_close', callback: () => void): void;
   offEvent(eventType: 'web_app_close', callback: () => void): void;
 }
 
-// Extend the global interface to recognize the custom Telegram WebApp
 declare global {
   interface Window {
     Telegram: {
@@ -39,8 +39,8 @@ const App: React.FC = () => {
   }
 
   const [userInfo, setUserInfo] = useState<UserInfo>({
-    first_name: '',
-    last_name: '',
+    first_name: 'pilot',
+    last_name: 'kombat',
     username: '',
     init: false,
   });
@@ -50,7 +50,8 @@ const App: React.FC = () => {
     message: ''
   });
 
-  const [telegramCode, setTelegramCode] = useState('');
+  const { slug } = useParams<{ slug?: string }>();
+  const [telegramCode, setTelegramCode] = useState(slug || '');
   const [isVerified, setIsVerified] = useState(false);
 
   const [levelNames, setLevelNames] = useState<string[]>([]);
@@ -71,7 +72,10 @@ const App: React.FC = () => {
       const telegram_id = id.toString();
       setUserInfo(prev => ({ ...prev, first_name, last_name, username, init: true, telegram_id }));
 
-      axios.get(`https://main-wjaxre4ena-uc.a.run.app/is_telegram_verified?telegram_id=${telegram_id}`)
+      const verificationParam = telegram_id !== '0000' ? `telegram_id=${telegram_id}` : `telegram_code=${telegramCode}`;
+      const verificationUrl = `https://main-wjaxre4ena-uc.a.run.app/is_telegram_verified?${verificationParam}`;
+
+      axios.get(verificationUrl)
         .then(response => {
           if (response.data.telegram_id_verified) {
             setIsVerified(true);
@@ -85,13 +89,13 @@ const App: React.FC = () => {
           setVerificationWarning({ show: true, message: 'Verification check failed. Please try again.' });
         });
     }
-  }, [userInfo.init]);
+  }, [userInfo.init, telegramCode]);
 
   useEffect(() => {
     const initializeGameData = async () => {
       try {
-        const gameDataResponse = await fetchGameData(userInfo.telegram_id || "");
-        const userDataResponse = await fetchUserData(userInfo.telegram_id || "");
+        const gameDataResponse = await fetchGameData(userInfo.telegram_id || '0000', userInfo.evm_address || '');
+        const userDataResponse = await fetchUserData(userInfo.telegram_id || '0000', userInfo.evm_address || '');
 
         if (gameDataResponse) {
           setLevelNames(gameDataResponse.levelNames);
@@ -109,14 +113,14 @@ const App: React.FC = () => {
       }
     };
 
-    if (userInfo.telegram_id) {
+    if (userInfo.telegram_id !== '0000' || userInfo.evm_address) {
       initializeGameData();
     }
-  }, [userInfo.telegram_id]);
+  }, [userInfo.telegram_id, userInfo.evm_address]);
 
   const handleVerificationSubmit = () => {
     if (userInfo.telegram_id && telegramCode) {
-      axios.post('https://main-wjaxre4ena-uc.a.run.app/verify_telegram_account', {
+      axios.post(`https://main-wjaxre4ena-uc.a.run.app/verify_telegram_account`, {
         telegram_id: userInfo.telegram_id,
         telegram_code: telegramCode,
       })
@@ -175,6 +179,7 @@ const App: React.FC = () => {
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
     card.style.transform = `perspective(1000px) rotateX(${-y / 10}deg) rotateY(${x / 10}deg)`;
+
     setTimeout(() => {
       card.style.transform = '';
     }, 100);
@@ -225,12 +230,11 @@ const App: React.FC = () => {
   );
 
   useEffect(() => {
-    if (userInfo.telegram_id && userInfo.evm_address) {
-      debouncedCheckIn(userInfo.telegram_id, userInfo.evm_address, points);
+    if ((userInfo.telegram_id || userInfo.evm_address) && points > 0) {
+      debouncedCheckIn(userInfo.telegram_id || '', userInfo.evm_address || '', points);
     }
   }, [points, userInfo.telegram_id, userInfo.evm_address, debouncedCheckIn]);
 
-  // New function to handle closing the verification modal
   const handleVerificationModalClose = () => {
     if (userInfo.evm_address) {
       setIsVerified(true);
@@ -239,7 +243,7 @@ const App: React.FC = () => {
   };
 
   const handleUserProfileClick = () => {
-    setIsVerified(false); // Reset isVerified to false when clicking on user profile
+    setIsVerified(false);
     setVerificationWarning({ show: true, message: 'You can update your Telegram ID with the provided code.' });
   };
 
@@ -253,7 +257,7 @@ const App: React.FC = () => {
             username={userInfo.username}
             isVerified={isVerified}
             evmAddress={userInfo.evm_address}
-            onClick={handleUserProfileClick} // Pass the onClick handler
+            onClick={handleUserProfileClick} 
           />
           <div className="flex items-center justify-between space-x-4 mt-1">
             <LevelProgress 
@@ -283,7 +287,7 @@ const App: React.FC = () => {
       <VerificationModal 
         isOpen={verificationWarning.show}
         message={verificationWarning.message}
-        onClose={handleVerificationModalClose} // Updated onClose handler
+        onClose={handleVerificationModalClose}
         isVerified={isVerified}
         telegramCode={telegramCode}
         onTelegramCodeChange={(e) => setTelegramCode(e.target.value)}

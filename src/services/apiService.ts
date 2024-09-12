@@ -1,8 +1,19 @@
+// src/services/apiService.ts
 import axios from 'axios';
 
-export const fetchGameData = async (telegram_id: string) => {
+const API_BASE_URL = 'https://main-wjaxre4ena-uc.a.run.app/api';
+
+// Utility function to decide the params based on identifier type
+const getFetchParams = (telegram_id: string, evm_address: string) => {
+  return telegram_id !== '0000'
+    ? { telegram_id }
+    : { evm_address };
+};
+
+export const fetchGameData = async (telegram_id: string, evm_address: string) => {
   try {
-    const response = await axios.get(`https://main-wjaxre4ena-uc.a.run.app/api/game-data?telegram_id=${telegram_id}`);
+    const params = getFetchParams(telegram_id, evm_address);
+    const response = await axios.get(`${API_BASE_URL}/game-data`, { params });
     return response.data;
   } catch (error) {
     console.error('Error fetching game data:', error);
@@ -10,9 +21,10 @@ export const fetchGameData = async (telegram_id: string) => {
   }
 };
 
-export const fetchUserData = async (telegram_id: string) => {
+export const fetchUserData = async (telegram_id: string, evm_address: string) => {
   try {
-    const response = await axios.get(`https://main-wjaxre4ena-uc.a.run.app/api/user-data?telegram_id=${telegram_id}`);
+    const params = getFetchParams(telegram_id, evm_address);
+    const response = await axios.get(`${API_BASE_URL}/user-data`, { params });
     return response.data;
   } catch (error) {
     console.error('Error fetching user data:', error);
@@ -22,13 +34,11 @@ export const fetchUserData = async (telegram_id: string) => {
 
 export const userCheckIn = async (telegram_id: string, evm_address: string, total_checkin_points: number) => {
   try {
-    await axios.get(`https://main-wjaxre4ena-uc.a.run.app/api/user-checkin`, {
-        params: {
-          telegram_id,
-          evm_address,
-          total_checkin_points,
-        },
-      });
+    const params = {
+        ...getFetchParams(telegram_id, evm_address),
+        total_checkin_points
+    };
+    await axios.get(`${API_BASE_URL}/user-checkin`, { params });
   } catch (error) {
     console.error('Error during check-in:', error);
   }
