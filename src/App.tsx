@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -184,7 +183,7 @@ const App: React.FC = () => {
       card.style.transform = '';
     }, 100);
 
-    setPoints(points + pointsToAdd);
+    setPoints(prevPoints => prevPoints + pointsToAdd);
     setClicks([...clicks, { id: Date.now(), x: e.pageX, y: e.pageY }]);
   };
 
@@ -214,9 +213,10 @@ const App: React.FC = () => {
     const pointsPerSecond = profitPerHour / 3600.0; // Use floating-point division for more accurate points calculation
     const interval = setInterval(() => {
       accumulatedPoints += pointsPerSecond;
-      if (accumulatedPoints >= 1) {
-        setPoints(prevPoints => prevPoints + Math.floor(accumulatedPoints));
-        accumulatedPoints -= Math.floor(accumulatedPoints); // Retain the fractional part
+      const integerPoints = Math.floor(accumulatedPoints);
+      if (integerPoints >= 1) {
+        setPoints(prevPoints => prevPoints + integerPoints);
+        accumulatedPoints -= integerPoints; // Subtract the added integer points, keep the fractional part
       }
     }, 1000);
     return () => clearInterval(interval);
@@ -225,7 +225,7 @@ const App: React.FC = () => {
   const debouncedCheckIn = useCallback(
     _.debounce(async (telegram_id: string, evm_address: string, total_checkin_points: number) => {
       try {
-        const response = await userCheckIn(telegram_id, evm_address, total_checkin_points);
+        const response = await userCheckIn(telegram_id, evm_address, parseInt(total_checkin_points.toString(), 10));
         if(response && response.new_stored_points > points) {
           setPoints(response.new_stored_points);
         }
