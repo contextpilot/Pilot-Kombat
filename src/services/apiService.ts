@@ -34,13 +34,16 @@ export const fetchUserData = async (telegram_id: string, evm_address: string) =>
 
 export const userCheckIn = async (telegram_id: string, evm_address: string, total_checkin_points: number) => {
   try {
+    // Cast total_checkin_points to integer
+    const totalCheckinPointsInt = parseInt(total_checkin_points.toString(), 10);
+
     // Validation check for required fields
     if (telegram_id !== '0000' && !evm_address) {
       throw new Error('EVM address is required when telegram_id is provided.');
     }
 
     // Construct the params object conditionally
-    const params: Record<string, any> = { total_checkin_points, evm_address };
+    const params: Record<string, any> = { total_checkin_points: totalCheckinPointsInt, evm_address };
     if (telegram_id !== '0000') {
       params.telegram_id = telegram_id;
     }
