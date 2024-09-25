@@ -12,6 +12,7 @@ import FooterNavigation from './components/FooterNavigation';
 import VerificationModal from './components/VerificationModal';
 import FloatingPoints from './components/FloatingPoints';
 import ProfitInfo from './components/ProfitInfo';
+import Withdraw from './components/Withdraw';
 import { fetchGameData, fetchUserData, userCheckIn } from './services/apiService';
 
 interface TelegramWebApp {
@@ -60,10 +61,11 @@ const App: React.FC = () => {
   const [clicks, setClicks] = useState<{ id: number, x: number, y: number }[]>([]);
   const [pointsToAdd, setPointsToAdd] = useState(0);
   const [profitPerHour, setProfitPerHour] = useState(0);
-
   const [dailyRewardTimeLeft, setDailyRewardTimeLeft] = useState("");
   const [dailyCipherTimeLeft, setDailyCipherTimeLeft] = useState("");
   const [dailyComboTimeLeft, setDailyComboTimeLeft] = useState("");
+
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false); // State to manage Withdraw component visibility
 
   useEffect(() => {
     if (WebApp && !userInfo.init) {
@@ -173,6 +175,10 @@ const App: React.FC = () => {
       return;
     }
 
+    if (isWithdrawOpen) {
+      return; // Disable click actions when withdraw modal is open
+    }
+
     const card = e.currentTarget;
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
@@ -226,7 +232,7 @@ const App: React.FC = () => {
     _.debounce(async (telegram_id: string, evm_address: string, total_checkin_points: number) => {
       try {
         const response = await userCheckIn(telegram_id, evm_address, parseInt(total_checkin_points.toString(), 10));
-        if(response && response.new_stored_points > points) {
+        if (response && response.new_stored_points > points) {
           setPoints(response.new_stored_points);
         }
       } catch (error) {
@@ -237,10 +243,10 @@ const App: React.FC = () => {
   );
 
   useEffect(() => {
-    if ((userInfo.telegram_id || userInfo.evm_address) && points > 0) {
+    if ((userInfo.telegram_id || userInfo.evm_address) && points > 0 && !isWithdrawOpen) {
       debouncedCheckIn(userInfo.telegram_id || '', userInfo.evm_address || '', points);
     }
-  }, [points, userInfo.telegram_id, userInfo.evm_address, debouncedCheckIn]);
+  }, [points, userInfo.telegram_id, userInfo.evm_address, debouncedCheckIn, isWithdrawOpen]);
 
   const handleVerificationModalClose = () => {
     if (userInfo.evm_address) {
@@ -252,6 +258,16 @@ const App: React.FC = () => {
   const handleUserProfileClick = () => {
     setIsVerified(false);
     setVerificationWarning({ show: true, message: 'You can update your Telegram ID with the provided code.' });
+  };
+
+  const handleWithdrawPoints = (withdrawPoints: number) => {
+    setPoints(prevPoints => prevPoints - withdrawPoints);
+  };
+
+  const handleFooterClick = (section: string) => {
+    if (section === 'Airdrop') {
+      setIsWithdrawOpen(true);
+    }
   };
 
   return (
@@ -287,9 +303,20 @@ const App: React.FC = () => {
           dailyComboTimeLeft={dailyComboTimeLeft}
           handleCardClick={handleCardClick}
         />
+
+        {isWithdrawOpen && (
+          <Withdraw
+            evmAddress={userInfo.evm_address}
+            points={points}
+            onWithdraw={handleWithdrawPoints}
+            onClose={() => setIsWithdrawOpen(false)}
+          />
+        )}
       </div>
 
-      <FooterNavigation />
+      <FooterNavigation 
+        onClick={handleFooterClick}
+      />
 
       <VerificationModal 
         isOpen={verificationWarning.show}
