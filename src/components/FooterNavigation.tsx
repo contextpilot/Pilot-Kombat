@@ -3,7 +3,6 @@ import { binanceLogo, hamsterCoin } from '../images';
 import Coins from '../icons/Coins';
 import Friends from '../icons/Friends';
 import Mine from '../icons/Mine';
-import Withdraw from './Withdraw';
 
 interface FooterNavigationProps {
   onClick: (section: string) => void;
