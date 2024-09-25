@@ -218,13 +218,13 @@ const App: React.FC = () => {
     let accumulatedPoints = 0;
     const pointsPerSecond = profitPerHour / 3600.0; // Use floating-point division for more accurate points calculation
     const interval = setInterval(() => {
-      accumulatedPoints += pointsPerSecond;
+      accumulatedPoints += pointsPerSecond * 10;
       const integerPoints = Math.floor(accumulatedPoints);
       if (integerPoints >= 1) {
         setPoints(prevPoints => prevPoints + integerPoints);
         accumulatedPoints -= integerPoints; // Subtract the added integer points, keep the fractional part
       }
-    }, 1000);
+    }, 10000);
     return () => clearInterval(interval);
   }, [profitPerHour]);
 
@@ -232,21 +232,21 @@ const App: React.FC = () => {
     _.debounce(async (telegram_id: string, evm_address: string, total_checkin_points: number) => {
       try {
         const response = await userCheckIn(telegram_id, evm_address, parseInt(total_checkin_points.toString(), 10));
-        if (response && response.new_stored_points > points) {
+        if (response) {
           setPoints(response.new_stored_points);
         }
       } catch (error) {
         console.error('Error during user check-in:', error);
       }
-    }, 500), // debounce delay of 5 seconds
-    [points] // added points as dependency
+    }, 500),
+    [userInfo.telegram_id, userInfo.evm_address]
   );
-
+  
   useEffect(() => {
     if ((userInfo.telegram_id || userInfo.evm_address) && points > 0 && !isWithdrawOpen) {
       debouncedCheckIn(userInfo.telegram_id || '', userInfo.evm_address || '', points);
     }
-  }, [points, userInfo.telegram_id, userInfo.evm_address, debouncedCheckIn, isWithdrawOpen]);
+  }, [points, userInfo.telegram_id, userInfo.evm_address, isWithdrawOpen, debouncedCheckIn]);
 
   const handleVerificationModalClose = () => {
     if (userInfo.evm_address) {
