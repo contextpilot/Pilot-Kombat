@@ -42,12 +42,24 @@ const Withdraw: React.FC<WithdrawProps> = ({ onClose, onWithdraw, evmAddress, po
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-4 w-96 text-gray-900"> { /* Set default text color */ }
+      <div className="bg-white rounded-lg p-4 w-96 text-gray-900">
         <h2 className="text-2xl font-bold mb-4">Withdraw Points</h2>
-        <p className="text-lg mb-2">Available points: {points}</p> {/* Increased font size */}
-        <label htmlFor="withdraw-points" className="text-sm font-small text-gray-700 mb-1"> {/* Increased font size */}
-          Points to Withdraw
-        </label>
+        <p className="text-lg mb-2">Available points: {points}</p>
+        
+        <div className="flex justify-between items-center mb-1">
+          <label htmlFor="withdraw-points" className="text-sm font-small text-gray-700">
+            Points to Withdraw
+          </label>
+          <a
+            href="https://doc.context-pilot.xyz/getting-started/use-pilot-kombat/points-withdraw"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 underline text-sm"
+          >
+            Documentation
+          </a>
+        </div>
+        
         <input
           id="withdraw-points"
           type="number"
