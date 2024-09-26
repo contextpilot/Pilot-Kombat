@@ -35,7 +35,11 @@ const Withdraw: React.FC<WithdrawProps> = ({ onClose, onWithdraw, evmAddress, po
       setStatus('Success!');
       onWithdraw(withdrawPoints);
     } catch (error) {
-      setStatus('Error: Could not process the withdrawal.');
+      if (axios.isAxiosError(error) && error.response) {
+        setStatus(`Error: ${error.response.data.error}`);
+      } else {
+        setStatus('Error: Could not process the withdrawal.');
+      }
       console.error(error);
     }
   };
@@ -65,7 +69,7 @@ const Withdraw: React.FC<WithdrawProps> = ({ onClose, onWithdraw, evmAddress, po
           type="number"
           value={withdrawPoints}
           onChange={(e) => setWithdrawPoints(Number(e.target.value))}
-          className="border p-2 w-full mb-4 text-black placeholder-gray-500" // Ensure input text is visible
+          className="border p-2 w-full mb-4 text-black placeholder-gray-500"
           placeholder="Enter points to withdraw"
         />
         <button
@@ -80,9 +84,9 @@ const Withdraw: React.FC<WithdrawProps> = ({ onClose, onWithdraw, evmAddress, po
         >
           Cancel
         </button>
-        {status && <p className="mt-4 text-gray-900">{status}</p>} {/* Added text color */}
+        {status && <p className="mt-4 text-gray-900">{status}</p>}
         {transactionHash && (
-          <p className="mt-4 text-gray-900"> {/* Added text color */}
+          <p className="mt-4 text-gray-900">
             Transaction: <a href={transactionHash} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">View Transaction</a>
           </p>
         )}
