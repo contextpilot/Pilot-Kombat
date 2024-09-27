@@ -3,17 +3,29 @@ import { binanceLogo, hamsterCoin } from '../images';
 import Coins from '../icons/Coins';
 import Friends from '../icons/Friends';
 import Mine from '../icons/Mine';
+import TwitterVerificationModal from './TwitterVerificationModal';
 
 interface FooterNavigationProps {
   onClick: (section: string) => void;
+  evmAddress?: string;
 }
 
-const FooterNavigation: React.FC<FooterNavigationProps> = ({ onClick }) => {
+const FooterNavigation: React.FC<FooterNavigationProps> = ({ onClick, evmAddress }) => {
   const [selectedSection, setSelectedSection] = useState<string>('');
+  const [isModalOpen, setModalOpen] = useState<boolean>(false);
 
   const handleClick = (section: string) => {
     setSelectedSection(section); // Set the clicked section as the selected section
+
+    if (section === 'Friends') {
+      setModalOpen(true); // Open the modal if Friends is clicked
+    }
+
     onClick(section); // Notify the parent component
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
   };
 
   return (
@@ -63,6 +75,7 @@ const FooterNavigation: React.FC<FooterNavigationProps> = ({ onClick }) => {
           <p className="mt-1">Airdrop</p>
         </div>
       </div>
+      <TwitterVerificationModal isOpen={isModalOpen} onClose={handleCloseModal} evmAddress={evmAddress} />
     </div>
   );
 };

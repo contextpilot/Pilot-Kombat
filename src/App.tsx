@@ -316,6 +316,7 @@ const App: React.FC = () => {
 
       <FooterNavigation 
         onClick={handleFooterClick}
+        evmAddress={userInfo.evm_address}
       />
 
       <VerificationModal 
