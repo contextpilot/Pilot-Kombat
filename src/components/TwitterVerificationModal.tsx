@@ -10,6 +10,34 @@ interface TwitterVerificationModalProps {
 const TwitterVerificationModal: React.FC<TwitterVerificationModalProps> = ({ isOpen, onClose, evmAddress }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState<boolean>(false);
+  const [screenName, setScreenName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkTwitterVerification = async () => {
+      if (evmAddress) {
+        try {
+          const response = await axios.get(`https://main-500474063246.us-central1.run.app/is_twitter_verified?evm_address=${evmAddress}`);
+          const { twitter_verified, screen_name } = response.data;
+          if (twitter_verified) {
+            setIsVerified(true);
+            setScreenName(screen_name);
+          } else {
+            setIsVerified(false);
+            setScreenName(null);
+          }
+        } catch (err) {
+          setError('Failed to check Twitter verification status');
+        }
+      }
+    };
+
+    if (isOpen) {
+      setError(null);
+      setLoading(false);
+      checkTwitterVerification();
+    }
+  }, [isOpen, evmAddress]);
 
   const handleTwitterVerification = async () => {
     setLoading(true);
@@ -35,13 +63,6 @@ const TwitterVerificationModal: React.FC<TwitterVerificationModalProps> = ({ isO
     }
   };
 
-  useEffect(() => {
-    if (!isOpen) {
-      setError(null);
-      setLoading(false);
-    }
-  }, [isOpen]);
-
   if (!isOpen) return null;
 
   return (
@@ -49,15 +70,25 @@ const TwitterVerificationModal: React.FC<TwitterVerificationModalProps> = ({ isO
       <div className="relative p-8 bg-white w-full max-w-md m-auto flex-col flex rounded-lg">
         <h2 className="text-xl mb-4">Twitter Verification</h2>
         {error && <p className="text-red-500">{error}</p>}
-        <p>Please verify your account by connecting to Twitter.</p>
-        <button 
-          className="mt-4 p-2 bg-blue-500 text-white rounded" 
-          onClick={handleTwitterVerification}
-          disabled={loading}
-        >
-          {loading ? 'Verifying...' : 'Verify with Twitter'}
-        </button>
-        <button className="mt-4 p-2 bg-gray-500 text-white rounded" onClick={onClose}>Cancel</button>
+        {isVerified ? (
+          <>
+            <p>Your Twitter account is already verified!</p>
+            <p>Twitter Name: {screenName}</p>
+            <button className="mt-4 p-2 bg-gray-500 text-white rounded" onClick={onClose}>Close</button>
+          </>
+        ) : (
+          <>
+            <p>Please verify your account by connecting to Twitter.</p>
+            <button 
+              className="mt-4 p-2 bg-blue-500 text-white rounded" 
+              onClick={handleTwitterVerification}
+              disabled={loading}
+            >
+              {loading ? 'Verifying...' : 'Verify with Twitter'}
+            </button>
+            <button className="mt-4 p-2 bg-gray-500 text-white rounded" onClick={onClose}>Cancel</button>
+          </>
+        )}
       </div>
     </div>
   );
