@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { openCustomTab } from 'react-custom-tabs';
 
 interface TwitterVerificationModalProps {
   isOpen: boolean;
@@ -42,22 +41,19 @@ const TwitterVerificationModal: React.FC<TwitterVerificationModalProps> = ({ isO
       const { auth_url, state } = response.data;
       sessionStorage.setItem('oauth_state', state);
 
-      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      const userAgent = navigator.userAgent || navigator.vendor;
       let twitterUrl = auth_url;
 
       if (/android/i.test(userAgent)) {
-        // Try to open in Chrome Custom Tab
-        openCustomTab(twitterUrl)
-          .catch(() => {
-            // Fallback to standard URL opening if Custom Tabs fails
-            const newWindow = window.open(twitterUrl, '_blank');
-            if (newWindow) {
-              newWindow.focus();
-            } else {
-              window.location.href = twitterUrl;
-            }
-          });
-      } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+        // Try to open in Chrome Custom Tab or fallback to default
+        const chromeIntentUrl = `intent://${auth_url.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+        const newWindow = window.open(chromeIntentUrl, '_blank');
+        if (newWindow) {
+          newWindow.focus();
+        } else {
+          window.location.href = twitterUrl;
+        }
+      } else if (/iPad|iPhone|iPod/.test(userAgent) && !('MSStream' in window)) {
         twitterUrl = `twitter://${auth_url.replace(/^https?:\/\//, '')}`;
         window.location.href = twitterUrl;
       } else {
