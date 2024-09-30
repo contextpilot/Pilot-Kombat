@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { openCustomTab } from 'react-custom-tabs';
 
 interface TwitterVerificationModalProps {
   isOpen: boolean;
@@ -19,13 +20,8 @@ const TwitterVerificationModal: React.FC<TwitterVerificationModalProps> = ({ isO
         try {
           const response = await axios.get(`https://main-500474063246.us-central1.run.app/is_twitter_verified?evm_address=${evmAddress}`);
           const { twitter_verified, screen_name } = response.data;
-          if (twitter_verified) {
-            setIsVerified(true);
-            setScreenName(screen_name);
-          } else {
-            setIsVerified(false);
-            setScreenName(null);
-          }
+          setIsVerified(twitter_verified);
+          setScreenName(twitter_verified ? screen_name : null);
         } catch (err) {
           setError('Failed to check Twitter verification status');
         }
@@ -43,29 +39,40 @@ const TwitterVerificationModal: React.FC<TwitterVerificationModalProps> = ({ isO
     setLoading(true);
     try {
       const response = await axios.post('https://main-wjaxre4ena-uc.a.run.app/api/twitter/request-token', { evm_address: evmAddress });
-      const { auth_url, state } = response.data; // Assuming response includes state parameter
-      sessionStorage.setItem('oauth_state', state); // Store state in session storage
-  
-      // Use the Intent URL scheme for Android or the Twitter URL scheme for iOS
-      const userAgent: string = navigator.userAgent || navigator.vendor || (window as any).opera;
-  
-      let twitterUrl: string;
+      const { auth_url, state } = response.data;
+      sessionStorage.setItem('oauth_state', state);
+
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      let twitterUrl = auth_url;
+
       if (/android/i.test(userAgent)) {
-        twitterUrl = `intent:${auth_url.replace('https://', '//')}#Intent;package=com.twitter.android;scheme=https;end`;
-      } else if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
-        twitterUrl = `twitter://${auth_url.replace('https://', '')}`;
+        // Try to open in Chrome Custom Tab
+        openCustomTab(twitterUrl)
+          .catch(() => {
+            // Fallback to standard URL opening if Custom Tabs fails
+            const newWindow = window.open(twitterUrl, '_blank');
+            if (newWindow) {
+              newWindow.focus();
+            } else {
+              window.location.href = twitterUrl;
+            }
+          });
+      } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+        twitterUrl = `twitter://${auth_url.replace(/^https?:\/\//, '')}`;
+        window.location.href = twitterUrl;
       } else {
-        twitterUrl = auth_url;
+        const newWindow = window.open(twitterUrl, '_blank');
+        if (newWindow) {
+          newWindow.focus();
+        } else {
+          window.location.href = twitterUrl;
+        }
       }
-  
-      // Open URL in a new window or redirect
-      window.location.href = twitterUrl;
-  
-      setLoading(true);
+
       setTimeout(() => {
         setLoading(false);
         onClose();
-      }, 3000); // wait for a few seconds to simulate process completion
+      }, 3000);
     } catch (err) {
       setError('Failed to initiate Twitter verification');
       setLoading(false);
