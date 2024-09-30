@@ -45,18 +45,25 @@ const TwitterVerificationModal: React.FC<TwitterVerificationModalProps> = ({ isO
       const response = await axios.post('https://main-wjaxre4ena-uc.a.run.app/api/twitter/request-token', { evm_address: evmAddress });
       const { auth_url, state } = response.data; // Assuming response includes state parameter
       sessionStorage.setItem('oauth_state', state); // Store state in session storage
-      
-      // Open a popup window for Twitter authorization
-      const popup = window.open(auth_url, '_blank', 'width=600,height=400');
-      
-      // Poll the popup window to check if user has completed the auth process
-      const pollTimer = window.setInterval(() => {
-        if (!popup || popup.closed !== false) {
-          window.clearInterval(pollTimer);
-          setLoading(false);
-          onClose();
-        }
-      }, 1000);
+
+      // Check if in a webview or app
+      const isWebViewOrApp = /Telegram/.test(navigator.userAgent);
+
+      if (isWebViewOrApp) {
+        // Use Twitter deep link to open the Twitter app
+        window.location.href = `twitter://?${auth_url}`;
+      } else {
+        // Open a popup window for Twitter authorization
+        const popup = window.open(auth_url, '_blank', 'width=600,height=400');
+
+        const pollTimer = window.setInterval(() => {
+          if (!popup || popup.closed !== false) {
+            window.clearInterval(pollTimer);
+            setLoading(false);
+            onClose();
+          }
+        }, 1000);
+      }
     } catch (err) {
       setError('Failed to initiate Twitter verification');
       setLoading(false);
