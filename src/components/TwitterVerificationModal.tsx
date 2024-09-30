@@ -47,12 +47,12 @@ const TwitterVerificationModal: React.FC<TwitterVerificationModalProps> = ({ isO
       sessionStorage.setItem('oauth_state', state); // Store state in session storage
 
       // Use the Intent URL scheme for Android or the Twitter URL scheme for iOS
-      const userAgent = navigator.userAgent || navigator.vendor || window['opera'];
-      
-      let twitterUrl;
+      const userAgent: string = navigator.userAgent || navigator.vendor || (window as any).opera;
+
+      let twitterUrl: string;
       if (/android/i.test(userAgent)) {
-        twitterUrl = `intent://${auth_url}//twitter.com`;
-      } else if (/iPad|iPhone|iPod/.test(userAgent) && !window['MSStream']) {
+        twitterUrl = `intent://${auth_url}#Intent;package=com.twitter.android;scheme=https;end`;
+      } else if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
         twitterUrl = `twitter://` + auth_url.replace('https://', '');
       } else {
         twitterUrl = auth_url; // Default to the standard URL for other environments
