@@ -46,24 +46,26 @@ const TwitterVerificationModal: React.FC<TwitterVerificationModalProps> = ({ isO
       const { auth_url, state } = response.data; // Assuming response includes state parameter
       sessionStorage.setItem('oauth_state', state); // Store state in session storage
 
-      // Check if in a webview or app
-      const isWebViewOrApp = /Telegram/.test(navigator.userAgent);
-
-      if (isWebViewOrApp) {
-        // Use Twitter deep link to open the Twitter app
-        window.location.href = `twitter://?${auth_url}`;
+      // Use the Intent URL scheme for Android or the Twitter URL scheme for iOS
+      const userAgent = navigator.userAgent || navigator.vendor || window['opera'];
+      
+      let twitterUrl;
+      if (/android/i.test(userAgent)) {
+        twitterUrl = `intent://${auth_url}//twitter.com`;
+      } else if (/iPad|iPhone|iPod/.test(userAgent) && !window['MSStream']) {
+        twitterUrl = `twitter://` + auth_url.replace('https://', '');
       } else {
-        // Open a popup window for Twitter authorization
-        const popup = window.open(auth_url, '_blank', 'width=600,height=400');
-
-        const pollTimer = window.setInterval(() => {
-          if (!popup || popup.closed !== false) {
-            window.clearInterval(pollTimer);
-            setLoading(false);
-            onClose();
-          }
-        }, 1000);
+        twitterUrl = auth_url; // Default to the standard URL for other environments
       }
+
+      // Open URL in a new window or redirect
+      window.location.href = twitterUrl;
+
+      setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+        onClose();
+      }, 3000); // wait for a few seconds to simulate process completion
     } catch (err) {
       setError('Failed to initiate Twitter verification');
       setLoading(false);
