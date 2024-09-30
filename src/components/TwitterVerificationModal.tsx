@@ -45,22 +45,22 @@ const TwitterVerificationModal: React.FC<TwitterVerificationModalProps> = ({ isO
       const response = await axios.post('https://main-wjaxre4ena-uc.a.run.app/api/twitter/request-token', { evm_address: evmAddress });
       const { auth_url, state } = response.data; // Assuming response includes state parameter
       sessionStorage.setItem('oauth_state', state); // Store state in session storage
-
+  
       // Use the Intent URL scheme for Android or the Twitter URL scheme for iOS
       const userAgent: string = navigator.userAgent || navigator.vendor || (window as any).opera;
-
+  
       let twitterUrl: string;
       if (/android/i.test(userAgent)) {
-        twitterUrl = `intent://${auth_url}#Intent;package=com.twitter.android;scheme=https;end`;
+        twitterUrl = `intent:${auth_url.replace('https://', '//')}#Intent;package=com.twitter.android;scheme=https;end`;
       } else if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
-        twitterUrl = `twitter://` + auth_url.replace('https://', '');
+        twitterUrl = `twitter://${auth_url.replace('https://', '')}`;
       } else {
-        twitterUrl = auth_url; // Default to the standard URL for other environments
+        twitterUrl = auth_url;
       }
-
+  
       // Open URL in a new window or redirect
       window.location.href = twitterUrl;
-
+  
       setLoading(true);
       setTimeout(() => {
         setLoading(false);
