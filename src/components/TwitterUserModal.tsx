@@ -20,12 +20,15 @@ const TwitterUserModal: React.FC<TwitterUserModalProps> = ({ isOpen, onClose, ev
       axios.get(url)
         .then((response) => {
           const message = response.data.message;
+          const error = response.data.error;
           if (message === 'Intent is verified') {
             setIsVerified(true);
           } else if (message === 'Intent not yet verified, it usually takes an hour.') {
             setIsVerified(message);
           } else if (message === 'Intent not found') {
             setIsVerified(false);
+          } else if (error === 'Verify Twitter first!') {
+            setIsVerified(error);
           }
         })
         .catch((error) => {
@@ -60,6 +63,14 @@ const TwitterUserModal: React.FC<TwitterUserModalProps> = ({ isOpen, onClose, ev
     }
   };
 
+  const getButtonText = () => {
+    if (loading) return 'Loading...';
+    if (isVerified === true) return 'Already Verified';
+    if (isVerified === 'Intent not yet verified, it usually takes an hour.') return 'Verification Pending';
+    if (isVerified === 'Verify Twitter first!') return 'Verify Twitter';
+    return 'Follow @cryptitalk';
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -72,6 +83,9 @@ const TwitterUserModal: React.FC<TwitterUserModalProps> = ({ isOpen, onClose, ev
         {isVerified === 'Intent not yet verified, it usually takes an hour.' && (
           <p className="mb-4 text-yellow-600">{isVerified}</p>
         )}
+        {isVerified === 'Verify Twitter first!' && (
+          <p className="mb-4 text-red-600">{isVerified}</p>
+        )}
         <button
           onClick={followCryptiTalk}
           disabled={loading || isVerified !== false}
@@ -79,7 +93,7 @@ const TwitterUserModal: React.FC<TwitterUserModalProps> = ({ isOpen, onClose, ev
             loading || isVerified !== false ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700 text-white'
           }`}
         >
-          {loading ? 'Loading...' : isVerified ? 'Already Verified' : 'Follow @cryptitalk'}
+          {getButtonText()}
         </button>
         <button
           onClick={onClose}
