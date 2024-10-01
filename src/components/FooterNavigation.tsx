@@ -4,6 +4,7 @@ import Coins from '../icons/Coins';
 import Friends from '../icons/Friends';
 import Mine from '../icons/Mine';
 import TwitterVerificationModal from './TwitterVerificationModal';
+import TwitterUserModal from './TwitterUserModal';
 
 interface FooterNavigationProps {
   onClick: (section: string) => void;
@@ -12,20 +13,29 @@ interface FooterNavigationProps {
 
 const FooterNavigation: React.FC<FooterNavigationProps> = ({ onClick, evmAddress }) => {
   const [selectedSection, setSelectedSection] = useState<string>('');
-  const [isModalOpen, setModalOpen] = useState<boolean>(false);
+  const [isVerificationModalOpen, setVerificationModalOpen] = useState<boolean>(false);
+  const [isTwitterModalOpen, setTwitterModalOpen] = useState<boolean>(false);
 
   const handleClick = (section: string) => {
     setSelectedSection(section); // Set the clicked section as the selected section
 
     if (section === 'Friends') {
-      setModalOpen(true); // Open the modal if Friends is clicked
+      setVerificationModalOpen(true); // Open the verification modal if Friends is clicked
+    }
+
+    if (section === 'Mine') {
+      setTwitterModalOpen(true); // Open the Twitter user modal if Mine is clicked
     }
 
     onClick(section); // Notify the parent component
   };
 
-  const handleCloseModal = () => {
-    setModalOpen(false);
+  const handleCloseVerificationModal = () => {
+    setVerificationModalOpen(false);
+  };
+
+  const handleCloseTwitterModal = () => {
+    setTwitterModalOpen(false);
   };
 
   return (
@@ -72,10 +82,11 @@ const FooterNavigation: React.FC<FooterNavigationProps> = ({ onClick, evmAddress
           onClick={() => handleClick('Airdrop')}
         >
           <img src={hamsterCoin} alt="Airdrop" className="w-8 h-8 mx-auto" />
-          <p className="mt-1">Airdrop</p>
+          <p className="mt-1">Withdraw</p>
         </div>
       </div>
-      <TwitterVerificationModal isOpen={isModalOpen} onClose={handleCloseModal} evmAddress={evmAddress} />
+      <TwitterVerificationModal isOpen={isVerificationModalOpen} onClose={handleCloseVerificationModal} evmAddress={evmAddress} />
+      <TwitterUserModal isOpen={isTwitterModalOpen} onClose={handleCloseTwitterModal} evmAddress={evmAddress} />
     </div>
   );
 };
