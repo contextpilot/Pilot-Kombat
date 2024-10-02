@@ -1,3 +1,4 @@
+// src/components/FooterNavigation.tsx
 import React, { useState } from 'react';
 import { binanceLogo, hamsterCoin } from '../images';
 import Coins from '../icons/Coins';
@@ -5,6 +6,7 @@ import Friends from '../icons/Friends';
 import Mine from '../icons/Mine';
 import TwitterVerificationModal from './TwitterVerificationModal';
 import TwitterUserModal from './TwitterUserModal';
+import TwitterIntentModal from './TwitterIntentModal';
 
 interface FooterNavigationProps {
   onClick: (section: string) => void;
@@ -14,7 +16,8 @@ interface FooterNavigationProps {
 const FooterNavigation: React.FC<FooterNavigationProps> = ({ onClick, evmAddress }) => {
   const [selectedSection, setSelectedSection] = useState<string>('');
   const [isVerificationModalOpen, setVerificationModalOpen] = useState<boolean>(false);
-  const [isTwitterModalOpen, setTwitterModalOpen] = useState<boolean>(false);
+  const [isTwitterUserModalOpen, setTwitterUserModalOpen] = useState<boolean>(false);
+  const [isTwitterIntentModalOpen, setTwitterIntentModalOpen] = useState<boolean>(false);
 
   const handleClick = (section: string) => {
     setSelectedSection(section); // Set the clicked section as the selected section
@@ -24,7 +27,11 @@ const FooterNavigation: React.FC<FooterNavigationProps> = ({ onClick, evmAddress
     }
 
     if (section === 'Mine') {
-      setTwitterModalOpen(true); // Open the Twitter user modal if Mine is clicked
+      setTwitterUserModalOpen(true); // Open the Twitter user modal if Mine is clicked
+    }
+
+    if (section === 'Earn') {
+      setTwitterIntentModalOpen(true); // Open the Twitter intent modal if Earn is clicked
     }
 
     onClick(section); // Notify the parent component
@@ -34,8 +41,12 @@ const FooterNavigation: React.FC<FooterNavigationProps> = ({ onClick, evmAddress
     setVerificationModalOpen(false);
   };
 
-  const handleCloseTwitterModal = () => {
-    setTwitterModalOpen(false);
+  const handleCloseTwitterUserModal = () => {
+    setTwitterUserModalOpen(false);
+  };
+
+  const handleCloseTwitterIntentModal = () => {
+    setTwitterIntentModalOpen(false);
   };
 
   return (
@@ -86,7 +97,8 @@ const FooterNavigation: React.FC<FooterNavigationProps> = ({ onClick, evmAddress
         </div>
       </div>
       <TwitterVerificationModal isOpen={isVerificationModalOpen} onClose={handleCloseVerificationModal} evmAddress={evmAddress} />
-      <TwitterUserModal isOpen={isTwitterModalOpen} onClose={handleCloseTwitterModal} evmAddress={evmAddress} />
+      <TwitterUserModal isOpen={isTwitterUserModalOpen} onClose={handleCloseTwitterUserModal} evmAddress={evmAddress} />
+      <TwitterIntentModal isOpen={isTwitterIntentModalOpen} onClose={handleCloseTwitterIntentModal} evmAddress={evmAddress} />
     </div>
   );
 };
