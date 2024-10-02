@@ -16,7 +16,7 @@ const TwitterUserModal: React.FC<TwitterUserModalProps> = ({ isOpen, onClose, ev
   useEffect(() => {
     if (isOpen && evmAddress) {
       const url = `https://main-500474063246.us-central1.run.app/is_intent_verified?evm_address=${evmAddress}&intent=follow&intent_id=1714501947070533632`;
-      
+
       axios.get(url)
         .then((response) => {
           const message = response.data.message;
@@ -79,7 +79,9 @@ const TwitterUserModal: React.FC<TwitterUserModalProps> = ({ isOpen, onClose, ev
     >
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
         <h2 className="text-xl font-bold mb-4">Follow us on Twitter</h2>
-        <p className="mb-4">Follow @cryptitalk on Twitter for updates!</p>
+        <p className="mb-4">
+          Follow @cryptitalk on Twitter for updates! <a href="https://doc.context-pilot.xyz/getting-started/use-pilot-kombat/twitter-follow" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">Documentation</a>
+        </p>
         {isVerified === 'Intent not yet verified, it usually takes an hour.' && (
           <p className="mb-4 text-yellow-600">{isVerified}</p>
         )}

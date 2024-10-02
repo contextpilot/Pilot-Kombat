@@ -128,7 +128,9 @@ const TwitterIntentModal: React.FC<TwitterIntentModalProps> = ({ isOpen, onClose
     >
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
         <h2 className="text-xl font-bold mb-4">Twitter Actions</h2>
-        <p className="mb-4">Perform the actions below on Twitter for rewards!</p>
+        <p className="mb-4">
+          Perform the actions below on Twitter for rewards! <a href="https://doc.context-pilot.xyz/getting-started/use-pilot-kombat/like-retweet-and-tweet-response" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">Documentation</a>
+        </p>
         {loading ? (
           <p>Loading...</p>
         ) : (
